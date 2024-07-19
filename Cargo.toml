@@ -35,7 +35,7 @@ thiserror = "1.0"
 tracing = "0.1"
 
 # Command-Line fature dependencies
-human-panic = { optional = true, version = "1.0" }
+human-panic = { optional = true, version = "2.0" }
 structopt = { optional = true, version = "0.3" }
 tracing-subscriber = { optional = true, version = "0.3", features = ["env-filter"] }
 
