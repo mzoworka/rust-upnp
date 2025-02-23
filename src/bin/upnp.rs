@@ -51,6 +51,14 @@ enum Command {
         /// The maximum wait time, in seconds, for devices to respond to multicast; the default is 2
         #[structopt(long, short = "w")]
         max_wait: Option<u8>,
+
+        /// Multicast address, default: 239.255.255.250
+        #[structopt(long, short = "a")]
+        address: Option<String>,
+        
+        /// Multicast port, default: 1900
+        #[structopt(long, short = "p")]
+        port: Option<u16>,
     },
     /// Listen for device notifications
     Listen,
@@ -63,6 +71,7 @@ pub enum CLSearchTarget {
     Device(String),
     DeviceType(String),
     ServiceType(String),
+    Raw(String),
 }
 
 #[derive(Debug)]
@@ -86,6 +95,8 @@ impl FromStr for CLSearchTarget {
             Ok(CLSearchTarget::All)
         } else if s == "root" {
             Ok(CLSearchTarget::RootDevice)
+        } else if let Some(stripped) = s.strip_prefix("raw:") {
+            Ok(CLSearchTarget::Raw(stripped.to_string()))
         } else if let Some(stripped) = s.strip_prefix("device:") {
             Ok(CLSearchTarget::Device(stripped.to_string()))
         } else if let Some(stripped) = s.strip_prefix("device-type:") {
@@ -125,6 +136,8 @@ pub fn main() {
             search_target,
             domain,
             max_wait,
+            address,
+            port,
         } => do_search(
             parse_version(args.spec_version),
             args.interface,
@@ -132,6 +145,8 @@ pub fn main() {
             search_target,
             domain,
             max_wait,
+            address,
+            port,
         ),
         Command::Listen => do_listen(),
     }
@@ -188,6 +203,7 @@ fn parse_version(version: Option<String>) -> SpecVersion {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn do_search(
     spec_version: SpecVersion,
     bind_to_interface: Option<String>,
@@ -195,8 +211,12 @@ fn do_search(
     search_target: Option<CLSearchTarget>,
     domain: Option<String>,
     max_wait_time: Option<u8>,
+    address: Option<String>,
+    port: Option<u16>,
 ) {
     let mut options = Options::default_for(spec_version);
+    options.address = address;
+    options.port = port;
     options.network_interface = bind_to_interface;
     options.network_version = Some(ip_version);
     if let Some(search_target) = search_target {
@@ -218,6 +238,7 @@ fn do_search(
                     SearchTarget::ServiceType(st)
                 }
             }
+            CLSearchTarget::Raw(st) => SearchTarget::Raw(st),
         }
     }
     if let Some(max_wait_time) = max_wait_time {

@@ -10,10 +10,7 @@ use crate::discovery::search::SearchTarget;
 use crate::discovery::ProductVersion;
 use crate::error::{unsupported_version, Error};
 use crate::syntax::{
-    HTTP_HEADER_BOOTID, HTTP_HEADER_CACHE_CONTROL, HTTP_HEADER_CONFIGID, HTTP_HEADER_HOST,
-    HTTP_HEADER_LOCATION, HTTP_HEADER_NEXT_BOOTID, HTTP_HEADER_NT, HTTP_HEADER_NTS,
-    HTTP_HEADER_SEARCH_PORT, HTTP_HEADER_SERVER, HTTP_HEADER_USN, HTTP_METHOD_NOTIFY,
-    MULTICAST_ADDRESS, NTS_ALIVE, NTS_BYE, NTS_UPDATE,
+    HTTP_HEADER_BOOTID, HTTP_HEADER_CACHE_CONTROL, HTTP_HEADER_CONFIGID, HTTP_HEADER_HOST, HTTP_HEADER_LOCATION, HTTP_HEADER_NEXT_BOOTID, HTTP_HEADER_NT, HTTP_HEADER_NTS, HTTP_HEADER_SEARCH_PORT, HTTP_HEADER_SERVER, HTTP_HEADER_USN, HTTP_METHOD_NOTIFY, MULTICAST_ADDRESS, MULTICAST_PORT, NTS_ALIVE, NTS_BYE, NTS_UPDATE
 };
 use crate::SpecVersion;
 
@@ -57,6 +54,10 @@ pub struct Options {
     /// the client will generate as part of sent messages. If not specified a default value based
     /// on the name and version of this crate will be used. Default: `None`.
     pub product_and_version: Option<ProductVersion>,
+    /// Multicast address, default: 239.255.255.250
+    pub address: Option<String>,
+    /// Multicast port, default: 1900
+    pub port: Option<u16>,
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -90,7 +91,7 @@ pub fn device_available(device: &mut Device, options: Options) -> Result<(), Err
     let next_boot_id = device.boot_id + 1;
     let mut message_builder = RequestBuilder::new(HTTP_METHOD_NOTIFY);
     message_builder
-        .add_header(HTTP_HEADER_HOST, MULTICAST_ADDRESS)
+        .add_header(HTTP_HEADER_HOST, format!("{}:{}", options.address.as_deref().unwrap_or(MULTICAST_ADDRESS), options.port.unwrap_or(MULTICAST_PORT)).as_str())
         .add_header(
             HTTP_HEADER_CACHE_CONTROL,
             &format!("max-age={}", options.max_age),
@@ -121,7 +122,7 @@ pub fn device_available(device: &mut Device, options: Options) -> Result<(), Err
 
     multicast_once(
         &message_builder.into(),
-        &MULTICAST_ADDRESS.parse().unwrap(),
+        &format!("{}:{}", options.address.as_deref().unwrap_or(MULTICAST_ADDRESS), options.port.unwrap_or(MULTICAST_PORT)).parse().unwrap(),
         &options.into(),
     )?;
 
@@ -171,7 +172,7 @@ pub fn device_update(device: &mut Device, options: Options) -> Result<(), Error>
         let next_boot_id = device.boot_id + 1;
         let mut message_builder = RequestBuilder::new(HTTP_METHOD_NOTIFY);
         message_builder
-            .add_header(HTTP_HEADER_HOST, MULTICAST_ADDRESS)
+            .add_header(HTTP_HEADER_HOST, format!("{}:{}", options.address.as_deref().unwrap_or(MULTICAST_ADDRESS), options.port.unwrap_or(MULTICAST_PORT)).as_str())
             .add_header(HTTP_HEADER_LOCATION, &device.location.to_string())
             .add_header(HTTP_HEADER_NT, &device.notification_type.to_string())
             .add_header(HTTP_HEADER_NTS, NTS_UPDATE)
@@ -192,7 +193,7 @@ pub fn device_update(device: &mut Device, options: Options) -> Result<(), Error>
 
         multicast_once(
             &message_builder.into(),
-            &MULTICAST_ADDRESS.parse().unwrap(),
+            &format!("{}:{}", options.address.as_deref().unwrap_or(MULTICAST_ADDRESS), options.port.unwrap_or(MULTICAST_PORT)).parse().unwrap(),
             &options.into(),
         )?;
         device.boot_id = next_boot_id;
@@ -228,7 +229,7 @@ pub fn device_unavailable(device: &mut Device, options: Options) -> Result<(), E
     let next_boot_id = device.boot_id + 1;
     let mut message_builder = RequestBuilder::new(HTTP_METHOD_NOTIFY);
     message_builder
-        .add_header(HTTP_HEADER_HOST, MULTICAST_ADDRESS)
+        .add_header(HTTP_HEADER_HOST, format!("{}:{}", options.address.as_deref().unwrap_or(MULTICAST_ADDRESS), options.port.unwrap_or(MULTICAST_PORT)).as_str())
         .add_header(HTTP_HEADER_NT, &device.notification_type.to_string())
         .add_header(HTTP_HEADER_NTS, NTS_BYE)
         .add_header(HTTP_HEADER_USN, &device.service_name.to_string());
@@ -241,7 +242,7 @@ pub fn device_unavailable(device: &mut Device, options: Options) -> Result<(), E
 
     multicast_once(
         &message_builder.into(),
-        &MULTICAST_ADDRESS.parse().unwrap(),
+        &format!("{}:{}", options.address.as_deref().unwrap_or(MULTICAST_ADDRESS), options.port.unwrap_or(MULTICAST_PORT)).parse().unwrap(),
         &options.into(),
     )?;
     device.boot_id = next_boot_id;
@@ -267,6 +268,9 @@ impl Options {
                 2
             },
             product_and_version: None,
+            address: Some(MULTICAST_ADDRESS.to_string()),
+            port: Some(MULTICAST_PORT),
+            
         }
     }
 }

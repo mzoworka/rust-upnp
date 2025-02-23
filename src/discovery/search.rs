@@ -25,7 +25,7 @@ use crate::syntax::{
     HTTP_HEADER_CP_FN, HTTP_HEADER_CP_UUID, HTTP_HEADER_DATE, HTTP_HEADER_EXT, HTTP_HEADER_HOST,
     HTTP_HEADER_LOCATION, HTTP_HEADER_MAN, HTTP_HEADER_MX, HTTP_HEADER_SEARCH_PORT,
     HTTP_HEADER_SERVER, HTTP_HEADER_ST, HTTP_HEADER_TCP_PORT, HTTP_HEADER_USER_AGENT,
-    HTTP_HEADER_USN, HTTP_METHOD_SEARCH, MULTICAST_ADDRESS,
+    HTTP_HEADER_USN, HTTP_METHOD_SEARCH, MULTICAST_ADDRESS, MULTICAST_PORT,
 };
 use crate::SpecVersion;
 use regex::Regex;
@@ -64,6 +64,8 @@ pub enum SearchTarget {
     DomainDeviceType(String, String),
     /// Corresponds to the value `urn:{domain-name}:service:{serviceType:ver}`
     DomainServiceType(String, String),
+    // Raw
+    Raw(String),
 }
 
 ///
@@ -111,6 +113,10 @@ pub struct Options {
     /// This value is **only** used by the 2.0 specification where it is required, otherwise it
     /// will be ignores. Default: `None`.
     pub control_point: Option<ControlPoint>,
+    /// Multicast address, default: 239.255.255.250
+    pub address: Option<String>,
+    /// Multicast port, default: 1900
+    pub port: Option<u16>,
 }
 
 #[derive(Clone, Debug)]
@@ -199,7 +205,7 @@ pub fn search_once(options: Options) -> Result<Vec<Response>, Error> {
     let mut message_builder = RequestBuilder::new(HTTP_METHOD_SEARCH);
     // All headers from the original 1.0 specification.
     message_builder
-        .add_header(HTTP_HEADER_HOST, MULTICAST_ADDRESS)
+        .add_header(HTTP_HEADER_HOST, format!("{}:{}", options.address.as_deref().unwrap_or(MULTICAST_ADDRESS), options.port.unwrap_or(MULTICAST_PORT)).as_str())
         .add_header(HTTP_HEADER_MAN, HTTP_EXTENSION)
         .add_header(HTTP_HEADER_MX, &format!("{}", options.max_wait_time))
         .add_header(HTTP_HEADER_ST, &options.search_target.to_string());
@@ -231,7 +237,7 @@ pub fn search_once(options: Options) -> Result<Vec<Response>, Error> {
     trace!("search_once - {:?}", &message_builder);
     let raw_responses = multicast(
         &message_builder.into(),
-        &MULTICAST_ADDRESS.parse().unwrap(),
+        &format!("{}:{}", options.address.as_deref().unwrap_or(MULTICAST_ADDRESS), options.port.unwrap_or(MULTICAST_PORT)).parse().unwrap(),
         &options.into(),
     )?;
 
@@ -272,7 +278,7 @@ pub fn search_once_to_device(
     if options.spec_version >= SpecVersion::V11 {
         let mut message_builder = RequestBuilder::new(HTTP_METHOD_SEARCH);
         message_builder
-            .add_header(HTTP_HEADER_HOST, MULTICAST_ADDRESS)
+            .add_header(HTTP_HEADER_HOST, format!("{}:{}", options.address.as_deref().unwrap_or(MULTICAST_ADDRESS), options.port.unwrap_or(MULTICAST_PORT)).as_str())
             .add_header(HTTP_HEADER_MAN, HTTP_EXTENSION)
             .add_header(HTTP_HEADER_ST, &options.search_target.to_string())
             .add_header(
@@ -313,6 +319,7 @@ impl Display for SearchTarget {
                     format!("urn:{}:device:{}", domain, device),
                 SearchTarget::DomainServiceType(domain, service) =>
                     format!("urn:{}:service:{}", domain, service),
+                SearchTarget::Raw(device) => format!("{}", device),
             }
         )
     }
@@ -330,6 +337,8 @@ impl FromStr for SearchTarget {
             Ok(SearchTarget::All)
         } else if s == "upnp:rootdevice" {
             Ok(SearchTarget::RootDevice)
+        } else if let Some(device) = s.strip_prefix("raw:") {
+            Ok(SearchTarget::Raw(device.to_string()))
         } else if let Some(device) = s.strip_prefix("uuid:") {
             Ok(SearchTarget::Device(device.to_string()))
         } else if let Some(device_type) = s.strip_prefix("urn:schemas-upnp-org:device:") {
@@ -383,6 +392,8 @@ impl Options {
             max_wait_time: 2,
             product_and_version: None,
             control_point: None,
+            address: Some(MULTICAST_ADDRESS.to_string()),
+            port: Some(MULTICAST_PORT),
         }
     }
 
@@ -465,7 +476,7 @@ impl TryFrom<MulticastResponse> for Response {
     fn try_from(response: MulticastResponse) -> Result<Self, Self::Error> {
         lazy_static! {
             static ref UA_ALL: Regex =
-                Regex::new(r"^([^/]+)/([\d\.]+),?[ ]+([^/]+)/([\d\.]+),?[ ]+([^/]+)/([\d\.]+)$")
+                Regex::new(r"^([^/]+)(/([\d\.]+))?,?[ ]+([^/]+)/([\d\.]+),?[ ]+([^/]+)/([\d\.]+)$")
                     .unwrap();
         }
         headers::check_required(&response.headers, &REQUIRED_HEADERS_V10)?;
@@ -478,16 +489,16 @@ impl TryFrom<MulticastResponse> for Response {
         let versions = match UA_ALL.captures(server) {
             Some(captures) => ProductVersions {
                 product: ProductVersion {
-                    name: captures.get(5).unwrap().as_str().to_string(),
-                    version: captures.get(6).unwrap().as_str().to_string(),
+                    name: captures.get(6).map(|x| x.as_str()).unwrap_or_default().to_string(),
+                    version: captures.get(7).map(|x| x.as_str()).unwrap_or_default().to_string(),
                 },
                 upnp: ProductVersion {
-                    name: captures.get(3).unwrap().as_str().to_string(),
-                    version: captures.get(4).unwrap().as_str().to_string(),
+                    name: captures.get(4).map(|x| x.as_str()).unwrap_or_default().to_string(),
+                    version: captures.get(5).map(|x| x.as_str()).unwrap_or_default().to_string(),
                 },
                 platform: ProductVersion {
-                    name: captures.get(1).unwrap().as_str().to_string(),
-                    version: captures.get(2).unwrap().as_str().to_string(),
+                    name: captures.get(1).map(|x| x.as_str()).unwrap_or_default().to_string(),
+                    version: captures.get(3).map(|x| x.as_str()).unwrap_or_default().to_string(),
                 },
             },
             None => {
@@ -516,10 +527,10 @@ impl TryFrom<MulticastResponse> for Response {
         );
 
         let service_name =
-            headers::check_not_empty(response.headers.get(HTTP_HEADER_USN), "undefined");
+            headers::check_not_empty(response.headers.get(HTTP_HEADER_USN), "raw:undefined");
 
         let search_target =
-            headers::check_not_empty(response.headers.get(HTTP_HEADER_ST), "undefined");
+            headers::check_not_empty(response.headers.get(HTTP_HEADER_ST), "raw:undefined");
 
         let mut boot_id = 0u64;
         let mut config_id: Option<u64> = None;

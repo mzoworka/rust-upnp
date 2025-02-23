@@ -117,24 +117,31 @@ fn decode_status_line(line: String) -> Result<ResponseStatus, MessageFormatError
 fn decode_headers(lines: Vec<String>) -> Result<HashMap<String, String>, MessageFormatError> {
     let mut headers: HashMap<String, String> = HashMap::new();
     for line in lines {
-        let (key, value) = decode_header(line)?;
+        let (key, value) = match decode_header(line)? {
+            Some(x) => x,
+            None => continue,
+        };
         headers.insert(key, value);
     }
     Ok(headers)
 }
 
-fn decode_header(line: String) -> Result<(String, String), MessageFormatError> {
+fn decode_header(line: String) -> Result<Option<(String, String)>, MessageFormatError> {
     lazy_static! {
         static ref RE: Regex = Regex::new(r"^([a-zA-Z0-9\-_]*)[ ]*:[ ]*(.*)$").unwrap();
     }
+    if line.is_empty() {
+        return Ok(None);
+    }
+
     match RE.captures(&line) {
         None => {
             error!("decode_header - could not decode header '{}'", line);
             invalid_header_value("?", line).into()
         }
-        Some(captured) => Ok((
+        Some(captured) => Ok(Some((
             captured.get(1).unwrap().as_str().to_uppercase(),
             captured.get(2).unwrap().as_str().to_string(),
-        )),
+        ))),
     }
 }
