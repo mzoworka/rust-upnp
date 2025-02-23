@@ -16,7 +16,8 @@ Multicast channel and port reserved for SSDP by _Internet Assigned Numbers Autho
 be `239.255.255.250:1900`. If the port number (":1900") is omitted, the receiver should assume the
 default SSDP port number of `1900`.
 */
-pub const MULTICAST_ADDRESS: &str = "239.255.255.250:1900";
+pub const MULTICAST_ADDRESS: &str = "239.255.255.250";
+pub const MULTICAST_PORT: u16 = 1900;
 
 // ------------------------------------------------------------------------------------------------
 // Public Values -- HTTP (core)
