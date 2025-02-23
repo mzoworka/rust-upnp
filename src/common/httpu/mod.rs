@@ -83,7 +83,7 @@ pub fn create_multicast_socket(
         _ => {
             return invalid_socket_value(
                 "to, local",
-                &format!("{}, {}", to_address, local_address),
+                format!("{}, {}", to_address, local_address),
             )
             .into();
         }

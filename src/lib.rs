@@ -77,9 +77,11 @@ use std::str::FromStr;
 /// specific version.
 ///
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Default)]
 pub enum SpecVersion {
     /// Denotes messages conforming to UPnP version
     /// [1.0](http://www.upnp.org/specs/arch/UPnP-arch-DeviceArchitecture-v1.0.pdf)
+    #[default]
     V10,
     /// Denotes messages conforming to UPnP version
     /// [1.1](http://www.upnp.org/specs/arch/UPnP-arch-DeviceArchitecture-v1.1.pdf)
@@ -103,11 +105,6 @@ pub const UPNP_DOMAIN: &str = "schemas-upnp-org";
 // Implementations
 // ------------------------------------------------------------------------------------------------
 
-impl Default for SpecVersion {
-    fn default() -> Self {
-        SpecVersion::V10
-    }
-}
 
 impl Display for SpecVersion {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), FmtError> {

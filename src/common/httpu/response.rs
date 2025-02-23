@@ -75,7 +75,7 @@ impl TryFrom<&[u8]> for Response {
 // ------------------------------------------------------------------------------------------------
 
 fn split_at_body(all: &[u8]) -> (&[u8], &[u8]) {
-    static BLANK_LINE: &[u8] = &[b'\r', b'\n', b'\r', b'\n'];
+    static BLANK_LINE: &[u8] = b"\r\n\r\n";
     match all
         .windows(BLANK_LINE.len())
         .position(|window| window == BLANK_LINE)
@@ -108,7 +108,7 @@ fn decode_status_line(line: String) -> Result<ResponseStatus, MessageFormatError
                 })
             } else {
                 error!("server returned error '{}'", status_code);
-                invalid_header_value("STATUS", &status_code.to_string()).into()
+                invalid_header_value("STATUS", status_code.to_string()).into()
             }
         }
     }
