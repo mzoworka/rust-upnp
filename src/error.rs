@@ -31,7 +31,7 @@ pub enum Error {
     #[error(transparent)]
     MessageFormat(#[from] MessageFormatError),
 
-    #[error("An operation you attempted returned an error status `{status}` (Operation: `{0}`)")]
+    #[error("An operation you attempted returned an error status `{status}` (Operation: `{operation}`)")]
     OperationFailed { operation: String, status: String },
 
     #[error("The version supplied is valid, but not supported (Version: `{version}`)")]

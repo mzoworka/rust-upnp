@@ -22,7 +22,7 @@ use std::io::Write;
 
 #[derive(Debug)]
 pub struct Element {
-    name: &'static [u8],
+    name: &'static str,
 }
 
 pub trait Writable<T: Write> {
@@ -49,29 +49,32 @@ pub fn start<T: Write>(writer: &mut Writer<T>) -> Result<(), quick_xml::Error> {
     writer
         .write_event(Event::Decl(BytesDecl::new(XML_DECL_VERSION, None, None)))
         .map(|_| ())
+        .map_err(|e| quick_xml::Error::Io(e.into()))
 }
 
 pub fn element<T: Write>(
     writer: &mut Writer<T>,
-    name: &'static [u8],
+    name: &'static str,
 ) -> Result<(), quick_xml::Error> {
-    writer.write_event(Event::Start(BytesStart::borrowed_name(name)))?;
+    writer.write_event(Event::Start(BytesStart::new(name)))?;
     writer
-        .write_event(Event::End(BytesEnd::borrowed(name)))
+        .write_event(Event::End(BytesEnd::new(name)))
         .map(|_| ())
+        .map_err(|e| quick_xml::Error::Io(e.into()))
 }
 
 pub fn start_element<T: Write>(
     writer: &mut Writer<T>,
-    name: &'static [u8],
+    name: &'static str,
 ) -> Result<Element, quick_xml::Error> {
-    writer.write_event(Event::Start(BytesStart::borrowed_name(name)))?;
+    writer.write_event(Event::Start(BytesStart::new(name)))
+    .map_err(|e| quick_xml::Error::Io(e.into()))?;
     Ok(Element { name })
 }
 
 pub fn start_ns_element<T: Write>(
     writer: &mut Writer<T>,
-    name: &'static [u8],
+    name: &'static str,
     namespace: &'static str,
     prefix: Option<&str>,
 ) -> Result<Element, quick_xml::Error> {
@@ -88,10 +91,10 @@ pub fn start_ns_element<T: Write>(
 
 pub fn start_element_with<T: Write>(
     writer: &mut Writer<T>,
-    name: &'static [u8],
+    name: &'static str,
     attrs: Vec<(&str, &str)>,
 ) -> Result<Element, quick_xml::Error> {
-    let mut element = BytesStart::borrowed_name(name);
+    let mut element = BytesStart::new(name);
     for (name, value) in attrs {
         element.push_attribute(Attribute::from((name, value)));
     }
@@ -99,19 +102,20 @@ pub fn start_element_with<T: Write>(
     Ok(Element { name })
 }
 
-pub fn end_element<T: Write>(writer: &mut Writer<T>, name: &[u8]) -> Result<(), quick_xml::Error> {
+pub fn end_element<T: Write>(writer: &mut Writer<T>, name: &str) -> Result<(), quick_xml::Error> {
     writer
-        .write_event(Event::End(BytesEnd::borrowed(name)))
+        .write_event(Event::End(BytesEnd::new(name)))
         .map(|_| ())
+        .map_err(|e| quick_xml::Error::Io(e.into()))
 }
 
 pub fn text_element<T: Write>(
     writer: &mut Writer<T>,
-    name: &'static [u8],
-    content: &[u8],
+    name: &'static str,
+    content: &str,
 ) -> Result<(), quick_xml::Error> {
     let element = start_element(writer, name)?;
-    writer.write_event(Event::Text(BytesText::from_plain(content)))?;
+    writer.write_event(Event::Text(BytesText::new(content)))?;
     element.end(writer)
 }
 
@@ -139,8 +143,7 @@ impl<T: Write> Writable<T> for SpecVersion {
                 SpecVersion::V10 => "1",
                 SpecVersion::V11 => "1",
                 SpecVersion::V20 => "2",
-            }
-            .as_bytes(),
+            },
         )
         .map_err(xml_error)?;
         text_element(
@@ -150,8 +153,7 @@ impl<T: Write> Writable<T> for SpecVersion {
                 SpecVersion::V10 => "0",
                 SpecVersion::V11 => "1",
                 SpecVersion::V20 => "0",
-            }
-            .as_bytes(),
+            },
         )
         .map_err(xml_error)?;
         spec_version.end(writer).map_err(xml_error)
