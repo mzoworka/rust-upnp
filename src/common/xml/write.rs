@@ -81,7 +81,7 @@ pub fn start_ns_element<T: Write>(
     let xmlns = [
         XML_ATTR_NAMESPACE,
         if prefix.is_some() { ":" } else { "" },
-        if let Some(p) = prefix { p } else { "" },
+        prefix.unwrap_or_default(),
     ]
     .concat();
 

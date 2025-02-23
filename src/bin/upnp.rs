@@ -1,4 +1,5 @@
 use human_panic::setup_panic;
+use std::fmt::Display;
 use std::str::FromStr;
 use structopt::StructOpt;
 use tracing::info;
@@ -85,12 +86,12 @@ impl FromStr for CLSearchTarget {
             Ok(CLSearchTarget::All)
         } else if s == "root" {
             Ok(CLSearchTarget::RootDevice)
-        } else if s.starts_with("device:") {
-            Ok(CLSearchTarget::Device(s[7..].to_string()))
-        } else if s.starts_with("device-type:") {
-            Ok(CLSearchTarget::DeviceType(s[12..].to_string()))
-        } else if s.starts_with("service-type:") {
-            Ok(CLSearchTarget::ServiceType(s[13..].to_string()))
+        } else if let Some(stripped) = s.strip_prefix("device:") {
+            Ok(CLSearchTarget::Device(stripped.to_string()))
+        } else if let Some(stripped) = s.strip_prefix("device-type:") {
+            Ok(CLSearchTarget::DeviceType(stripped.to_string()))
+        } else if let Some(stripped) = s.strip_prefix("service-type:") {
+            Ok(CLSearchTarget::ServiceType(stripped.to_string()))
         } else {
             Err(CommandLineError::InvalidParameterValue(
                 "search_target".to_string(),
@@ -100,15 +101,15 @@ impl FromStr for CLSearchTarget {
     }
 }
 
-impl ToString for CommandLineError {
-    fn to_string(&self) -> String {
+impl Display for CommandLineError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            CommandLineError::MissingParameter(p) => format!("Parameter {} required", p),
-            CommandLineError::UnexpectedParameter(p) => format!("Parameter {} unnecessary", p),
+            CommandLineError::MissingParameter(p) => write!(f, "Parameter {} required", p),
+            CommandLineError::UnexpectedParameter(p) => write!(f, "Parameter {} unnecessary", p),
             CommandLineError::InvalidParameterValue(p, v) => {
-                format!("Value '{}' invalid for parameter {}", v, p)
+                write!(f, "Value '{}' invalid for parameter {}", v, p)
             }
-        }
+        }   
     }
 }
 
@@ -173,11 +174,11 @@ fn init_tracing(verbosity: i8) {
 
 fn parse_version(version: Option<String>) -> SpecVersion {
     if let Some(s) = version {
-        if s == "1.0".to_string() {
+        if &s == "1.0" {
             SpecVersion::V10
-        } else if s == "1.1".to_string() {
+        } else if &s == "1.1" {
             SpecVersion::V11
-        } else if s == "2.0".to_string() {
+        } else if &s == "2.0" {
             SpecVersion::V20
         } else {
             SpecVersion::default()

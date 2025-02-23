@@ -168,7 +168,7 @@ pub struct Response {
 /// # Parameters
 ///
 /// * `options` - protocol options such as the specification version to use and any network
-/// configuration values.
+///   configuration values.
 ///
 pub fn search(options: Options) -> Result<ResponseCache, Error> {
     info!("search - options: {:?}", options);
@@ -190,7 +190,7 @@ pub fn search(options: Options) -> Result<ResponseCache, Error> {
 /// # Parameters
 ///
 /// * `options` - protocol options such as the specification version to use and any network
-/// configuration values.
+///   configuration values.
 ///
 ///
 pub fn search_once(options: Options) -> Result<Vec<Response>, Error> {
@@ -256,7 +256,7 @@ pub fn search_once(options: Options) -> Result<Vec<Response>, Error> {
 /// # Parameters
 ///
 /// * `options` - protocol options such as the specification version to use and any network
-/// configuration values.
+///   configuration values.
 /// * `device_address` - the address of the device to query.
 ///
 ///
@@ -407,7 +407,7 @@ impl Options {
                 "validate - max_wait_time must be between 1..120 ({})",
                 self.max_wait_time
             );
-            return invalid_field_value("max_wait_time", &self.max_wait_time.to_string()).into();
+            return invalid_field_value("max_wait_time", self.max_wait_time.to_string()).into();
         }
         if self.spec_version >= SpecVersion::V11 {
             if let Some(user_agent) = &self.product_and_version {
@@ -416,7 +416,7 @@ impl Options {
                         "validate - user_agent needs to match 'ProductName/Version' ({:?})",
                         user_agent
                     );
-                    return invalid_field_value("UserAgent", &user_agent.to_string()).into();
+                    return invalid_field_value("UserAgent", user_agent.to_string()).into();
                 }
             }
         }
