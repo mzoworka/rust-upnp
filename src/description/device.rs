@@ -91,7 +91,7 @@ impl<T: Write> Writable<T> for DeviceRoot {
         text_element(
             writer,
             XML_ELEM_URL_BASE,
-            self.url_base.to_string().as_bytes(),
+            self.url_base.to_string().as_str(),
         )
         .map_err(xml_error)?;
 
@@ -108,47 +108,47 @@ impl<T: Write> Writable<T> for Device {
         text_element(
             writer,
             XML_ELEM_DEVICE_TYPE,
-            self.device_type.to_string().as_bytes(),
+            self.device_type.to_string().as_str(),
         )
         .map_err(xml_error)?;
 
         text_element(
             writer,
             XML_ELEM_FRIENDLY_NAME,
-            self.friendly_name.as_bytes(),
+            self.friendly_name.as_str(),
         )
         .map_err(xml_error)?;
 
-        text_element(writer, XML_ELEM_MANUFACTURER, self.manufacturer.as_bytes())
+        text_element(writer, XML_ELEM_MANUFACTURER, self.manufacturer.as_str())
             .map_err(xml_error)?;
 
         if let Some(s) = &self.manufacturer_url {
-            text_element(writer, XML_ELEM_MANUFACTURER_URL, s.as_bytes()).map_err(xml_error)?;
+            text_element(writer, XML_ELEM_MANUFACTURER_URL, s.as_str()).map_err(xml_error)?;
         }
 
         if let Some(s) = &self.model_description {
-            text_element(writer, XML_ELEM_MODEL_DESCR, s.as_bytes()).map_err(xml_error)?;
+            text_element(writer, XML_ELEM_MODEL_DESCR, s.as_str()).map_err(xml_error)?;
         }
 
-        text_element(writer, XML_ELEM_MODEL_NAME, self.model_name.as_bytes()).map_err(xml_error)?;
+        text_element(writer, XML_ELEM_MODEL_NAME, self.model_name.as_str()).map_err(xml_error)?;
 
         if let Some(s) = &self.model_number {
-            text_element(writer, XML_ELEM_MODEL_NUMBER, s.as_bytes()).map_err(xml_error)?;
+            text_element(writer, XML_ELEM_MODEL_NUMBER, s.as_str()).map_err(xml_error)?;
         }
 
         if let Some(s) = &self.model_url {
-            text_element(writer, XML_ELEM_MODEL_URL, s.as_bytes()).map_err(xml_error)?;
+            text_element(writer, XML_ELEM_MODEL_URL, s.as_str()).map_err(xml_error)?;
         }
 
         if let Some(s) = &self.serial_number {
-            text_element(writer, XML_ELEM_SERIAL_NUMBER, s.as_bytes()).map_err(xml_error)?;
+            text_element(writer, XML_ELEM_SERIAL_NUMBER, s.as_str()).map_err(xml_error)?;
         }
 
-        text_element(writer, XML_ELEM_UDN, self.unique_device_name.as_bytes())
+        text_element(writer, XML_ELEM_UDN, self.unique_device_name.as_str())
             .map_err(xml_error)?;
 
         if let Some(s) = &self.upc {
-            text_element(writer, XML_ELEM_UPC, s.as_bytes()).map_err(xml_error)?;
+            text_element(writer, XML_ELEM_UPC, s.as_str()).map_err(xml_error)?;
         }
 
         if !&self.icon_list.is_empty() {
@@ -176,7 +176,7 @@ impl<T: Write> Writable<T> for Device {
         }
 
         if let Some(s) = &self.presentation_url {
-            text_element(writer, XML_ELEM_PRESENTATION_URL, s.as_bytes()).map_err(xml_error)?;
+            text_element(writer, XML_ELEM_PRESENTATION_URL, s.as_str()).map_err(xml_error)?;
         }
 
         top.end(writer).map_err(xml_error)
@@ -187,27 +187,27 @@ impl<T: Write> Writable<T> for Icon {
     fn write(&self, writer: &mut Writer<T>) -> Result<(), Error> {
         let element = start_element(writer, XML_ELEM_ICON).map_err(xml_error)?;
 
-        text_element(writer, XML_ELEM_ICON_MIME_TYPE, self.mime_type.as_bytes())
+        text_element(writer, XML_ELEM_ICON_MIME_TYPE, self.mime_type.as_str())
             .map_err(xml_error)?;
         text_element(
             writer,
             XML_ELEM_ICON_WIDTH,
-            self.width.to_string().as_bytes(),
+            self.width.to_string().as_str(),
         )
         .map_err(xml_error)?;
         text_element(
             writer,
             XML_ELEM_ICON_HEIGHT,
-            self.height.to_string().as_bytes(),
+            self.height.to_string().as_str(),
         )
         .map_err(xml_error)?;
         text_element(
             writer,
             XML_ELEM_ICON_DEPTH,
-            self.depth.to_string().as_bytes(),
+            self.depth.to_string().as_str(),
         )
         .map_err(xml_error)?;
-        text_element(writer, XML_ELEM_ICON_URL, self.url.as_bytes()).map_err(xml_error)?;
+        text_element(writer, XML_ELEM_ICON_URL, self.url.as_str()).map_err(xml_error)?;
 
         element.end(writer).map_err(xml_error)
     }
@@ -221,26 +221,26 @@ impl<T: Write> Writable<T> for Service {
         text_element(
             writer,
             XML_ELEM_SERVICE_TYPE,
-            self.service_type.to_string().as_bytes(),
+            self.service_type.to_string().as_str(),
         )
         .map_err(xml_error)?;
 
-        text_element(writer, XML_ELEM_SERVICE_ID, self.service_id.as_bytes()).map_err(xml_error)?;
+        text_element(writer, XML_ELEM_SERVICE_ID, self.service_id.as_str()).map_err(xml_error)?;
 
-        text_element(writer, XML_ELEM_SERVICE_SCPD_URL, self.scpd_url.as_bytes())
+        text_element(writer, XML_ELEM_SERVICE_SCPD_URL, self.scpd_url.as_str())
             .map_err(xml_error)?;
 
         text_element(
             writer,
             XML_ELEM_SERVICE_CONTROL_URL,
-            self.control_url.as_bytes(),
+            self.control_url.as_str(),
         )
         .map_err(xml_error)?;
 
         text_element(
             writer,
             XML_ELEM_SERVICE_EVENT_URL,
-            self.event_sub_url.as_bytes(),
+            self.event_sub_url.as_str(),
         )
         .map_err(xml_error)?;
 

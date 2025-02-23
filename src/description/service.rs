@@ -83,14 +83,14 @@ impl<T: Write> Writable<T> for Argument {
     fn write(&self, writer: &mut Writer<T>) -> Result<(), Error> {
         let argument = start_element(writer, XML_ELEM_ARGUMENT).map_err(xml_error)?;
 
-        text_element(writer, XML_ELEM_NAME, self.name.as_bytes()).map_err(xml_error)?;
+        text_element(writer, XML_ELEM_NAME, self.name.as_str()).map_err(xml_error)?;
 
         text_element(
             writer,
             XML_ELEM_DIRECTION,
             match &self.direction {
-                Direction::In => "in".as_bytes(),
-                Direction::Out => "out".as_bytes(),
+                Direction::In => "in",
+                Direction::Out => "out",
             },
         )
         .map_err(xml_error)?;
@@ -102,7 +102,7 @@ impl<T: Write> Writable<T> for Argument {
         text_element(
             writer,
             XML_ELEM_REL_STATE_VARIABLE,
-            self.related_state_variable.as_bytes(),
+            self.related_state_variable.as_str(),
         )
         .map_err(xml_error)?;
 
@@ -114,7 +114,7 @@ impl<T: Write> Writable<T> for Action {
     fn write(&self, writer: &mut Writer<T>) -> Result<(), Error> {
         let action = start_element(writer, XML_ELEM_ACTION).map_err(xml_error)?;
 
-        text_element(writer, XML_ELEM_NAME, self.name.as_bytes()).map_err(xml_error)?;
+        text_element(writer, XML_ELEM_NAME, self.name.as_str()).map_err(xml_error)?;
 
         if !&self.argument_list.is_empty() {
             let list = start_element(writer, XML_ELEM_ARGUMENT_LIST).map_err(xml_error)?;
@@ -134,7 +134,7 @@ impl<T: Write> Writable<T> for AllowedValue {
             AllowedValue::List { values } => {
                 let list = start_element(writer, XML_ELEM_ALLOWED_LIST).map_err(xml_error)?;
                 for value in values {
-                    text_element(writer, XML_ELEM_ALLOWED_VALUE, value.as_bytes())
+                    text_element(writer, XML_ELEM_ALLOWED_VALUE, value.as_str())
                         .map_err(xml_error)?;
                 }
                 list.end(writer).map_err(xml_error)
@@ -146,12 +146,12 @@ impl<T: Write> Writable<T> for AllowedValue {
             } => {
                 let range = start_element(writer, XML_ELEM_ALLOWED_RANGE).map_err(xml_error)?;
 
-                text_element(writer, XML_ELEM_MINIMUM, minimum.as_bytes()).map_err(xml_error)?;
+                text_element(writer, XML_ELEM_MINIMUM, minimum.as_str()).map_err(xml_error)?;
 
-                text_element(writer, XML_ELEM_MAXIMUM, maximum.as_bytes()).map_err(xml_error)?;
+                text_element(writer, XML_ELEM_MAXIMUM, maximum.as_str()).map_err(xml_error)?;
 
                 if let Some(step) = step {
-                    text_element(writer, XML_ELEM_STEP, step.as_bytes()).map_err(xml_error)?;
+                    text_element(writer, XML_ELEM_STEP, step.as_str()).map_err(xml_error)?;
                 }
                 range.end(writer).map_err(xml_error)
             }
@@ -171,12 +171,12 @@ impl<T: Write> Writable<T> for StateVariable {
         )
         .map_err(xml_error)?;
 
-        text_element(writer, XML_ELEM_NAME, self.name.as_bytes()).map_err(xml_error)?;
+        text_element(writer, XML_ELEM_NAME, self.name.as_str()).map_err(xml_error)?;
 
-        text_element(writer, XML_ELEM_DATA_TYPE, self.data_type.as_bytes()).map_err(xml_error)?;
+        text_element(writer, XML_ELEM_DATA_TYPE, self.data_type.as_str()).map_err(xml_error)?;
 
         if let Some(default_value) = &self.default_value {
-            text_element(writer, XML_ELEM_DEFAULT_VALUE, default_value.as_bytes())
+            text_element(writer, XML_ELEM_DEFAULT_VALUE, default_value.as_str())
                 .map_err(xml_error)?;
         }
 
