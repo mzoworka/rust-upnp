@@ -319,7 +319,7 @@ impl Display for SearchTarget {
                     format!("urn:{}:device:{}", domain, device),
                 SearchTarget::DomainServiceType(domain, service) =>
                     format!("urn:{}:service:{}", domain, service),
-                SearchTarget::Raw(device) => format!("{}", device),
+                SearchTarget::Raw(device) => device.to_string(),
             }
         )
     }
