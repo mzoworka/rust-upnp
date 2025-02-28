@@ -476,7 +476,7 @@ impl TryFrom<MulticastResponse> for Response {
     fn try_from(response: MulticastResponse) -> Result<Self, Self::Error> {
         lazy_static! {
             static ref UA_ALL: Regex =
-                Regex::new(r"^([^/]+)(/([\d\.]+))?,?[ ]+([^/]+)/([\d\.]+),?[ ]+([^/]+)/([\d\.]+)$")
+                Regex::new(r"^([^/ ]+)([/ ]([\d\.]+))?,?[ ]+([^/]+)/([\d\.]+),?[ ]+([^/]+)/V?([\d\.]+)$")
                     .unwrap();
         }
         headers::check_required(&response.headers, &REQUIRED_HEADERS_V10)?;
