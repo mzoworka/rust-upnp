@@ -59,6 +59,10 @@ enum Command {
         /// Multicast port, default: 1900
         #[structopt(long, short = "p")]
         port: Option<u16>,
+        
+        /// Multicast bind port, default: random
+        #[structopt(long, short = "b")]
+        bind_port: Option<u16>,
     },
     /// Listen for device notifications
     Listen,
@@ -138,6 +142,7 @@ pub fn main() {
             max_wait,
             address,
             port,
+            bind_port,
         } => do_search(
             parse_version(args.spec_version),
             args.interface,
@@ -147,6 +152,7 @@ pub fn main() {
             max_wait,
             address,
             port,
+            bind_port
         ),
         Command::Listen => do_listen(),
     }
@@ -213,10 +219,12 @@ fn do_search(
     max_wait_time: Option<u8>,
     address: Option<String>,
     port: Option<u16>,
+    bind_port: Option<u16>,
 ) {
     let mut options = Options::default_for(spec_version);
     options.address = address;
     options.port = port;
+    options.bind_port = bind_port;
     options.network_interface = bind_to_interface;
     options.network_version = Some(ip_version);
     if let Some(search_target) = search_target {

@@ -117,6 +117,8 @@ pub struct Options {
     pub address: Option<String>,
     /// Multicast port, default: 1900
     pub port: Option<u16>,
+    /// Multicast bind port, default: random
+    pub bind_port: Option<u16>,
 }
 
 #[derive(Clone, Debug)]
@@ -394,6 +396,7 @@ impl Options {
             control_point: None,
             address: Some(MULTICAST_ADDRESS.to_string()),
             port: Some(MULTICAST_PORT),
+            bind_port: None,
         }
     }
 
@@ -454,6 +457,7 @@ impl From<Options> for MulticastOptions {
             network_version: options.network_version,
             packet_ttl: options.packet_ttl,
             recv_timeout: options.max_wait_time as u64,
+            local_port: options.bind_port.unwrap_or_default(),
             ..Default::default()
         }
     }
