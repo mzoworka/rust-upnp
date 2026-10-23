@@ -1,7 +1,7 @@
+use clap::{ArgAction, Parser};
 use human_panic::setup_panic;
 use std::fmt::Display;
 use std::str::FromStr;
-use structopt::StructOpt;
 use tracing::info;
 use upnp_rs::common::interface::IP;
 use upnp_rs::discovery::search::*;
@@ -11,30 +11,30 @@ use upnp_rs::SpecVersion;
 // Public Types
 // ------------------------------------------------------------------------------------------------
 
-#[derive(StructOpt)]
-#[structopt(name = "upnp", about = "UPnP simple qery/discovery tool.")]
+#[derive(Parser)]
+#[clap(name = "upnp", about = "UPnP simple qery/discovery tool.")]
 struct CommandLine {
     /// The level of logging to perform, from off to trace; the default is off
-    #[structopt(long, short = "v", parse(from_occurrences))]
+    #[clap(long, short = 'v', action = ArgAction::Count)]
     verbose: i8,
 
     /// The network interface name to bind to; the default is all
-    #[structopt(long)]
+    #[clap(long)]
     interface: Option<String>,
 
     /// Use IPv6 instead of the default v4
-    #[structopt(long, short = "6")]
+    #[clap(long, short = '6')]
     use_ipv6: bool,
 
     /// The UPnP version to use, 1.0, 1.1, or 2.0; the default is 1.0
-    #[structopt(long, short = "V")]
+    #[clap(long, short = 'V')]
     spec_version: Option<String>,
 
-    #[structopt(subcommand)]
+    #[clap(subcommand)]
     cmd: Command,
 }
 
-#[derive(StructOpt)]
+#[derive(clap::Parser)]
 enum Command {
     /// Issue a multicast search to find devices
     Search {
@@ -49,26 +49,26 @@ enum Command {
         domain: Option<String>,
 
         /// The maximum wait time, in seconds, for devices to respond to multicast; the default is 2
-        #[structopt(long, short = "w")]
+        #[structopt(long, short = 'w')]
         max_wait: Option<u8>,
 
         /// Multicast address, default: 239.255.255.250
-        #[structopt(long, short = "a")]
+        #[structopt(long, short = 'a')]
         address: Option<String>,
-        
+
         /// Multicast port, default: 1900
-        #[structopt(long, short = "p")]
+        #[structopt(long, short = 'p')]
         port: Option<u16>,
-        
+
         /// Multicast bind port, default: random
-        #[structopt(long, short = "b")]
+        #[structopt(long, short = 'b')]
         bind_port: Option<u16>,
     },
     /// Listen for device notifications
     Listen,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum CLSearchTarget {
     All,
     RootDevice,
@@ -84,6 +84,8 @@ pub enum CommandLineError {
     UnexpectedParameter(String),
     InvalidParameterValue(String, String),
 }
+
+impl std::error::Error for CommandLineError {}
 
 // ------------------------------------------------------------------------------------------------
 // Implementations
@@ -124,14 +126,14 @@ impl Display for CommandLineError {
             CommandLineError::InvalidParameterValue(p, v) => {
                 write!(f, "Value '{}' invalid for parameter {}", v, p)
             }
-        }   
+        }
     }
 }
 
 pub fn main() {
     setup_panic!();
 
-    let args = CommandLine::from_args();
+    let args = CommandLine::parse();
 
     init_tracing(args.verbose);
 
@@ -152,7 +154,7 @@ pub fn main() {
             max_wait,
             address,
             port,
-            bind_port
+            bind_port,
         ),
         Command::Listen => do_listen(),
     }
@@ -264,13 +266,13 @@ Search parameters
 * Wait time: {} seconds
     
 ## Results "#,
-        &options.spec_version,
-        &options.search_target,
+        options.spec_version,
+        options.search_target,
         match &options.network_interface {
             None => "all".to_string(),
             Some(s) => s.to_string(),
         },
-        &options.max_wait_time
+        options.max_wait_time
     );
     match search_once(options) {
         Ok(responses) => {

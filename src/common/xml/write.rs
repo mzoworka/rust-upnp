@@ -67,8 +67,9 @@ pub fn start_element<T: Write>(
     writer: &mut Writer<T>,
     name: &'static str,
 ) -> Result<Element, quick_xml::Error> {
-    writer.write_event(Event::Start(BytesStart::new(name)))
-    .map_err(|e| quick_xml::Error::Io(e.into()))?;
+    writer
+        .write_event(Event::Start(BytesStart::new(name)))
+        .map_err(|e| quick_xml::Error::Io(e.into()))?;
     Ok(Element { name })
 }
 

@@ -112,12 +112,8 @@ impl<T: Write> Writable<T> for Device {
         )
         .map_err(xml_error)?;
 
-        text_element(
-            writer,
-            XML_ELEM_FRIENDLY_NAME,
-            self.friendly_name.as_str(),
-        )
-        .map_err(xml_error)?;
+        text_element(writer, XML_ELEM_FRIENDLY_NAME, self.friendly_name.as_str())
+            .map_err(xml_error)?;
 
         text_element(writer, XML_ELEM_MANUFACTURER, self.manufacturer.as_str())
             .map_err(xml_error)?;
@@ -144,8 +140,7 @@ impl<T: Write> Writable<T> for Device {
             text_element(writer, XML_ELEM_SERIAL_NUMBER, s.as_str()).map_err(xml_error)?;
         }
 
-        text_element(writer, XML_ELEM_UDN, self.unique_device_name.as_str())
-            .map_err(xml_error)?;
+        text_element(writer, XML_ELEM_UDN, self.unique_device_name.as_str()).map_err(xml_error)?;
 
         if let Some(s) = &self.upc {
             text_element(writer, XML_ELEM_UPC, s.as_str()).map_err(xml_error)?;
@@ -189,24 +184,16 @@ impl<T: Write> Writable<T> for Icon {
 
         text_element(writer, XML_ELEM_ICON_MIME_TYPE, self.mime_type.as_str())
             .map_err(xml_error)?;
-        text_element(
-            writer,
-            XML_ELEM_ICON_WIDTH,
-            self.width.to_string().as_str(),
-        )
-        .map_err(xml_error)?;
+        text_element(writer, XML_ELEM_ICON_WIDTH, self.width.to_string().as_str())
+            .map_err(xml_error)?;
         text_element(
             writer,
             XML_ELEM_ICON_HEIGHT,
             self.height.to_string().as_str(),
         )
         .map_err(xml_error)?;
-        text_element(
-            writer,
-            XML_ELEM_ICON_DEPTH,
-            self.depth.to_string().as_str(),
-        )
-        .map_err(xml_error)?;
+        text_element(writer, XML_ELEM_ICON_DEPTH, self.depth.to_string().as_str())
+            .map_err(xml_error)?;
         text_element(writer, XML_ELEM_ICON_URL, self.url.as_str()).map_err(xml_error)?;
 
         element.end(writer).map_err(xml_error)

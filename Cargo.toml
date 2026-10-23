@@ -21,24 +21,24 @@ required-features = ["command_line"]
 
 [features]
 default = []
-command_line = ["human-panic", "structopt", "tracing-subscriber"]
+command_line = ["human-panic", "clap", "tracing-subscriber"]
 
 [dependencies]
-ipnetwork = "0.21"
-lazy_static = "1.4.0"
-os-version = "0.2"
-pnet = {version = "0.35", features = ["std"] }
-quick-xml = "0.39"
-regex = "1.3"
-reqwest = { version = "0.13", features = ["blocking"] }
-thiserror = "2.0"
-tracing = "0.1"
-openssl = { version = "0.10.*", features = ["vendored"] }
+clap = { optional = true, version = "4.6.7", features = ["derive"] }
+#openssl = { version = "0.10.81", features = ["vendored"] }
 
 # Command-Line fature dependencies
-human-panic = { optional = true, version = "2.0" }
-structopt = { optional = true, version = "0.3" }
-tracing-subscriber = { optional = true, version = "0.3", features = ["env-filter"] }
+human-panic = { optional = true, version = "2.0.8" }
+#ipnetwork = "0.21.1"
+lazy_static = "1.4.0"
+os-version = "0.2.1"
+pnet = { version = "0.35", features = ["std"] }
+quick-xml = "0.42.0"
+regex = "1.13.1"
+reqwest = { version = "0.13.5", features = ["blocking"] }
+thiserror = "2.0.21"
+tracing = "0.1.44"
+tracing-subscriber = { optional = true, version = "0.3.23", features = ["env-filter"] }
 
 [dev-dependencies]
-pretty_assertions = "1.2"
+pretty_assertions = "1.4.1"

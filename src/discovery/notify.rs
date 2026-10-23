@@ -10,7 +10,10 @@ use crate::discovery::search::SearchTarget;
 use crate::discovery::ProductVersion;
 use crate::error::{unsupported_version, Error};
 use crate::syntax::{
-    HTTP_HEADER_BOOTID, HTTP_HEADER_CACHE_CONTROL, HTTP_HEADER_CONFIGID, HTTP_HEADER_HOST, HTTP_HEADER_LOCATION, HTTP_HEADER_NEXT_BOOTID, HTTP_HEADER_NT, HTTP_HEADER_NTS, HTTP_HEADER_SEARCH_PORT, HTTP_HEADER_SERVER, HTTP_HEADER_USN, HTTP_METHOD_NOTIFY, MULTICAST_ADDRESS, MULTICAST_PORT, NTS_ALIVE, NTS_BYE, NTS_UPDATE
+    HTTP_HEADER_BOOTID, HTTP_HEADER_CACHE_CONTROL, HTTP_HEADER_CONFIGID, HTTP_HEADER_HOST,
+    HTTP_HEADER_LOCATION, HTTP_HEADER_NEXT_BOOTID, HTTP_HEADER_NT, HTTP_HEADER_NTS,
+    HTTP_HEADER_SEARCH_PORT, HTTP_HEADER_SERVER, HTTP_HEADER_USN, HTTP_METHOD_NOTIFY,
+    MULTICAST_ADDRESS, MULTICAST_PORT, NTS_ALIVE, NTS_BYE, NTS_UPDATE,
 };
 use crate::SpecVersion;
 
@@ -64,6 +67,7 @@ pub struct Options {
 // Public Functions
 // ------------------------------------------------------------------------------------------------
 
+#[allow(clippy::doc_overindented_list_items)]
 /**
 Provides an implementation of the `ssdp:alive` notification.
 
@@ -91,7 +95,15 @@ pub fn device_available(device: &mut Device, options: Options) -> Result<(), Err
     let next_boot_id = device.boot_id + 1;
     let mut message_builder = RequestBuilder::new(HTTP_METHOD_NOTIFY);
     message_builder
-        .add_header(HTTP_HEADER_HOST, format!("{}:{}", options.address.as_deref().unwrap_or(MULTICAST_ADDRESS), options.port.unwrap_or(MULTICAST_PORT)).as_str())
+        .add_header(
+            HTTP_HEADER_HOST,
+            format!(
+                "{}:{}",
+                options.address.as_deref().unwrap_or(MULTICAST_ADDRESS),
+                options.port.unwrap_or(MULTICAST_PORT)
+            )
+            .as_str(),
+        )
         .add_header(
             HTTP_HEADER_CACHE_CONTROL,
             &format!("max-age={}", options.max_age),
@@ -122,7 +134,13 @@ pub fn device_available(device: &mut Device, options: Options) -> Result<(), Err
 
     multicast_once(
         &message_builder.into(),
-        &format!("{}:{}", options.address.as_deref().unwrap_or(MULTICAST_ADDRESS), options.port.unwrap_or(MULTICAST_PORT)).parse().unwrap(),
+        &format!(
+            "{}:{}",
+            options.address.as_deref().unwrap_or(MULTICAST_ADDRESS),
+            options.port.unwrap_or(MULTICAST_PORT)
+        )
+        .parse()
+        .unwrap(),
         &options.into(),
     )?;
 
@@ -130,6 +148,7 @@ pub fn device_available(device: &mut Device, options: Options) -> Result<(), Err
     Ok(())
 }
 
+#[allow(clippy::doc_overindented_list_items)]
 /**
 Provides an implementation of the `ssdp:upate` notification.
 
@@ -172,7 +191,15 @@ pub fn device_update(device: &mut Device, options: Options) -> Result<(), Error>
         let next_boot_id = device.boot_id + 1;
         let mut message_builder = RequestBuilder::new(HTTP_METHOD_NOTIFY);
         message_builder
-            .add_header(HTTP_HEADER_HOST, format!("{}:{}", options.address.as_deref().unwrap_or(MULTICAST_ADDRESS), options.port.unwrap_or(MULTICAST_PORT)).as_str())
+            .add_header(
+                HTTP_HEADER_HOST,
+                format!(
+                    "{}:{}",
+                    options.address.as_deref().unwrap_or(MULTICAST_ADDRESS),
+                    options.port.unwrap_or(MULTICAST_PORT)
+                )
+                .as_str(),
+            )
             .add_header(HTTP_HEADER_LOCATION, &device.location.to_string())
             .add_header(HTTP_HEADER_NT, &device.notification_type.to_string())
             .add_header(HTTP_HEADER_NTS, NTS_UPDATE)
@@ -193,7 +220,13 @@ pub fn device_update(device: &mut Device, options: Options) -> Result<(), Error>
 
         multicast_once(
             &message_builder.into(),
-            &format!("{}:{}", options.address.as_deref().unwrap_or(MULTICAST_ADDRESS), options.port.unwrap_or(MULTICAST_PORT)).parse().unwrap(),
+            &format!(
+                "{}:{}",
+                options.address.as_deref().unwrap_or(MULTICAST_ADDRESS),
+                options.port.unwrap_or(MULTICAST_PORT)
+            )
+            .parse()
+            .unwrap(),
             &options.into(),
         )?;
         device.boot_id = next_boot_id;
@@ -201,6 +234,7 @@ pub fn device_update(device: &mut Device, options: Options) -> Result<(), Error>
     }
 }
 
+#[allow(clippy::doc_overindented_list_items)]
 /**
 Provides an implementation of the `ssdp:byebye` notification.
 
@@ -229,7 +263,15 @@ pub fn device_unavailable(device: &mut Device, options: Options) -> Result<(), E
     let next_boot_id = device.boot_id + 1;
     let mut message_builder = RequestBuilder::new(HTTP_METHOD_NOTIFY);
     message_builder
-        .add_header(HTTP_HEADER_HOST, format!("{}:{}", options.address.as_deref().unwrap_or(MULTICAST_ADDRESS), options.port.unwrap_or(MULTICAST_PORT)).as_str())
+        .add_header(
+            HTTP_HEADER_HOST,
+            format!(
+                "{}:{}",
+                options.address.as_deref().unwrap_or(MULTICAST_ADDRESS),
+                options.port.unwrap_or(MULTICAST_PORT)
+            )
+            .as_str(),
+        )
         .add_header(HTTP_HEADER_NT, &device.notification_type.to_string())
         .add_header(HTTP_HEADER_NTS, NTS_BYE)
         .add_header(HTTP_HEADER_USN, &device.service_name.to_string());
@@ -242,7 +284,13 @@ pub fn device_unavailable(device: &mut Device, options: Options) -> Result<(), E
 
     multicast_once(
         &message_builder.into(),
-        &format!("{}:{}", options.address.as_deref().unwrap_or(MULTICAST_ADDRESS), options.port.unwrap_or(MULTICAST_PORT)).parse().unwrap(),
+        &format!(
+            "{}:{}",
+            options.address.as_deref().unwrap_or(MULTICAST_ADDRESS),
+            options.port.unwrap_or(MULTICAST_PORT)
+        )
+        .parse()
+        .unwrap(),
         &options.into(),
     )?;
     device.boot_id = next_boot_id;
@@ -270,7 +318,6 @@ impl Options {
             product_and_version: None,
             address: Some(MULTICAST_ADDRESS.to_string()),
             port: Some(MULTICAST_PORT),
-            
         }
     }
 }

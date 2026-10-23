@@ -207,7 +207,15 @@ pub fn search_once(options: Options) -> Result<Vec<Response>, Error> {
     let mut message_builder = RequestBuilder::new(HTTP_METHOD_SEARCH);
     // All headers from the original 1.0 specification.
     message_builder
-        .add_header(HTTP_HEADER_HOST, format!("{}:{}", options.address.as_deref().unwrap_or(MULTICAST_ADDRESS), options.port.unwrap_or(MULTICAST_PORT)).as_str())
+        .add_header(
+            HTTP_HEADER_HOST,
+            format!(
+                "{}:{}",
+                options.address.as_deref().unwrap_or(MULTICAST_ADDRESS),
+                options.port.unwrap_or(MULTICAST_PORT)
+            )
+            .as_str(),
+        )
         .add_header(HTTP_HEADER_MAN, HTTP_EXTENSION)
         .add_header(HTTP_HEADER_MX, &format!("{}", options.max_wait_time))
         .add_header(HTTP_HEADER_ST, &options.search_target.to_string());
@@ -239,7 +247,13 @@ pub fn search_once(options: Options) -> Result<Vec<Response>, Error> {
     trace!("search_once - {:?}", &message_builder);
     let raw_responses = multicast(
         &message_builder.into(),
-        &format!("{}:{}", options.address.as_deref().unwrap_or(MULTICAST_ADDRESS), options.port.unwrap_or(MULTICAST_PORT)).parse().unwrap(),
+        &format!(
+            "{}:{}",
+            options.address.as_deref().unwrap_or(MULTICAST_ADDRESS),
+            options.port.unwrap_or(MULTICAST_PORT)
+        )
+        .parse()
+        .unwrap(),
         &options.into(),
     )?;
 
@@ -280,7 +294,15 @@ pub fn search_once_to_device(
     if options.spec_version >= SpecVersion::V11 {
         let mut message_builder = RequestBuilder::new(HTTP_METHOD_SEARCH);
         message_builder
-            .add_header(HTTP_HEADER_HOST, format!("{}:{}", options.address.as_deref().unwrap_or(MULTICAST_ADDRESS), options.port.unwrap_or(MULTICAST_PORT)).as_str())
+            .add_header(
+                HTTP_HEADER_HOST,
+                format!(
+                    "{}:{}",
+                    options.address.as_deref().unwrap_or(MULTICAST_ADDRESS),
+                    options.port.unwrap_or(MULTICAST_PORT)
+                )
+                .as_str(),
+            )
             .add_header(HTTP_HEADER_MAN, HTTP_EXTENSION)
             .add_header(HTTP_HEADER_ST, &options.search_target.to_string())
             .add_header(
@@ -493,16 +515,40 @@ impl TryFrom<MulticastResponse> for Response {
         let versions = match UA_ALL.captures(server) {
             Some(captures) => ProductVersions {
                 product: ProductVersion {
-                    name: captures.get(6).map(|x| x.as_str()).unwrap_or_default().to_string(),
-                    version: captures.get(7).map(|x| x.as_str()).unwrap_or_default().to_string(),
+                    name: captures
+                        .get(6)
+                        .map(|x| x.as_str())
+                        .unwrap_or_default()
+                        .to_string(),
+                    version: captures
+                        .get(7)
+                        .map(|x| x.as_str())
+                        .unwrap_or_default()
+                        .to_string(),
                 },
                 upnp: ProductVersion {
-                    name: captures.get(4).map(|x| x.as_str()).unwrap_or_default().to_string(),
-                    version: captures.get(5).map(|x| x.as_str()).unwrap_or_default().to_string(),
+                    name: captures
+                        .get(4)
+                        .map(|x| x.as_str())
+                        .unwrap_or_default()
+                        .to_string(),
+                    version: captures
+                        .get(5)
+                        .map(|x| x.as_str())
+                        .unwrap_or_default()
+                        .to_string(),
                 },
                 platform: ProductVersion {
-                    name: captures.get(1).map(|x| x.as_str()).unwrap_or_default().to_string(),
-                    version: captures.get(3).map(|x| x.as_str()).unwrap_or_default().to_string(),
+                    name: captures
+                        .get(1)
+                        .map(|x| x.as_str())
+                        .unwrap_or_default()
+                        .to_string(),
+                    version: captures
+                        .get(3)
+                        .map(|x| x.as_str())
+                        .unwrap_or_default()
+                        .to_string(),
                 },
             },
             None => {

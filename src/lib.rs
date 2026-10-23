@@ -1,55 +1,55 @@
 /*!
-* This crate implements the four major components of the _UPnP Device Architecture_ (UDA), namely
-*
-* 1. Discovery, the search and notification functions via the _Simple Service Discovery Protocol_
-*    (SSDP).
-* 2. Description, the device and service templates.
-* 3. Control, TBD
-* 4. Eventing, via the  _General Event Notification Architecture_ (GENA).
-*
-* The UDA covers the search for devices by a control point (client) as well as how devices respond
-* with, and proactively advertise, capabilities. There are currently 3 versions of the UDA
-* specification, v[1.0](http://www.upnp.org/specs/arch/UPnP-arch-DeviceArchitecture-v1.0.pdf),
-* v[1.1](http://www.upnp.org/specs/arch/UPnP-arch-DeviceArchitecture-v1.1.pdf) (also standardized as
-* ISO/IEC 29341-1-1), and v[2.0](http://www.upnp.org/specs/arch/UPnP-arch-DeviceArchitecture-v2.0.pdf).
-*
-* For more information see the specifications and other documents at [Open Connectivity
-* Foundation](https://openconnectivity.org/developer/specifications/upnp-resources/upnp/).
-*
-* The main interface is the [`ssdp`](ssdp/index.html) module.
-*
-* # Example
-*
-* The following example issues a single v1.0 multicast search and collects and returns a set of
-* device responses.
-*
-* ```rust,no_run
-* use upnp_rs::SpecVersion;
-* use upnp_rs::discovery::search::*;
-*
-* let mut options = Options::default_for(SpecVersion::V10);
-* options.search_target = SearchTarget::RootDevice;
-*
-* match search_once(options) {
-*     Ok(responses) => {
-*         println!("search returned {} results.", responses.len());
-*         for (index, response) in responses.iter().enumerate() {
-*             println!("{}: {:#?}", index, response);
-*         }
-*     }
-*     Err(error) => {
-*         println!("search failed with error: {:#?}", error);
-*     }
-* }
-* ```
-*
-* # Documentation
-*
-* Where possible any documentation for fields, functions, and values will be taken directly from the
-* UDA specifications. In general the description will be taken from the version of the specication
-* where the component in question was first introduced.
-*
-*/
+ * This crate implements the four major components of the _UPnP Device Architecture_ (UDA), namely
+ *
+ * 1. Discovery, the search and notification functions via the _Simple Service Discovery Protocol_
+ *    (SSDP).
+ * 2. Description, the device and service templates.
+ * 3. Control, TBD
+ * 4. Eventing, via the  _General Event Notification Architecture_ (GENA).
+ *
+ * The UDA covers the search for devices by a control point (client) as well as how devices respond
+ * with, and proactively advertise, capabilities. There are currently 3 versions of the UDA
+ * specification, v[1.0](http://www.upnp.org/specs/arch/UPnP-arch-DeviceArchitecture-v1.0.pdf),
+ * v[1.1](http://www.upnp.org/specs/arch/UPnP-arch-DeviceArchitecture-v1.1.pdf) (also standardized as
+ * ISO/IEC 29341-1-1), and v[2.0](http://www.upnp.org/specs/arch/UPnP-arch-DeviceArchitecture-v2.0.pdf).
+ *
+ * For more information see the specifications and other documents at [Open Connectivity
+ * Foundation](https://openconnectivity.org/developer/specifications/upnp-resources/upnp/).
+ *
+ * The main interface is the [`ssdp`](ssdp/index.html) module.
+ *
+ * # Example
+ *
+ * The following example issues a single v1.0 multicast search and collects and returns a set of
+ * device responses.
+ *
+ * ```rust,no_run
+ * use upnp_rs::SpecVersion;
+ * use upnp_rs::discovery::search::*;
+ *
+ * let mut options = Options::default_for(SpecVersion::V10);
+ * options.search_target = SearchTarget::RootDevice;
+ *
+ * match search_once(options) {
+ *     Ok(responses) => {
+ *         println!("search returned {} results.", responses.len());
+ *         for (index, response) in responses.iter().enumerate() {
+ *             println!("{}: {:#?}", index, response);
+ *         }
+ *     }
+ *     Err(error) => {
+ *         println!("search failed with error: {:#?}", error);
+ *     }
+ * }
+ * ```
+ *
+ * # Documentation
+ *
+ * Where possible any documentation for fields, functions, and values will be taken directly from the
+ * UDA specifications. In general the description will be taken from the version of the specication
+ * where the component in question was first introduced.
+ *
+ */
 
 #![warn(
     missing_debug_implementations,
@@ -76,8 +76,7 @@ use std::str::FromStr;
 /// This allows the client to constrain the messaging to only the capabilities described by a
 /// specific version.
 ///
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
-#[derive(Default)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub enum SpecVersion {
     /// Denotes messages conforming to UPnP version
     /// [1.0](http://www.upnp.org/specs/arch/UPnP-arch-DeviceArchitecture-v1.0.pdf)
@@ -104,7 +103,6 @@ pub const UPNP_DOMAIN: &str = "schemas-upnp-org";
 // ------------------------------------------------------------------------------------------------
 // Implementations
 // ------------------------------------------------------------------------------------------------
-
 
 impl Display for SpecVersion {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), FmtError> {

@@ -81,11 +81,8 @@ pub fn create_multicast_socket(
             socket.set_multicast_loop_v6(options.loop_back_also)?;
         }
         _ => {
-            return invalid_socket_value(
-                "to, local",
-                format!("{}, {}", to_address, local_address),
-            )
-            .into();
+            return invalid_socket_value("to, local", format!("{}, {}", to_address, local_address))
+                .into();
         }
     }
 
